@@ -1,24 +1,25 @@
 {
-  "name": "upsen-website",
+  "name": "upsen-dashboard",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "vercel-build": "next build"
   },
   "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "lucide-react": "latest",
-    "tailwindcss": "latest",
-    "autoprefixer": "latest",
-    "postcss": "latest"
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.309.0"
   },
   "devDependencies": {
-    "eslint": "latest",
-    "eslint-config-next": "latest"
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "^14.0.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5"
   }
 }
