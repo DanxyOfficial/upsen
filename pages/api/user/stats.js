@@ -1,38 +1,35 @@
 import { db } from '../../../lib/database';
 
 export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle OPTIONS request for CORS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
-    const data = db.getData();
+    const stats = db.getStats();
     
-    // Hitung stats
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    
-    const activeToday = data.activities.filter(activity => {
-      const activityDate = new Date(activity.timestamp).toISOString().split('T')[0];
-      return activityDate === today;
-    }).length;
-
-    const totalUsers = data.users.length;
-    const totalUsage = data.users.reduce((sum, user) => sum + user.totalUsage, 0);
-    
-    // Hitung hari hingga reset
-    const lastReset = new Date(data.lastReset);
-    const nextReset = new Date(lastReset);
-    nextReset.setDate(nextReset.getDate() + 30);
-    const daysUntilReset = Math.ceil((nextReset - now) / (1000 * 60 * 60 * 24));
-
     return res.status(200).json({
-      totalUsers,
-      activeToday,
-      totalUsage,
-      daysUntilReset,
-      lastReset: data.lastReset,
-      nextReset: nextReset.toISOString()
+      success: true,
+      ...stats,
+      serverTime: new Date().toISOString(),
+      status: 'operational'
     });
 
   } catch (error) {
     console.error('Stats API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message 
+    });
   }
 }
