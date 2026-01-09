@@ -140,4 +140,56 @@ export default function UsersPage() {
             </div>
             <div className="bg-gray-800/50 rounded-xl p-4">
               <div className="text-2xl font-bold text-blue-400">
-                {users.reduce((sum, user) => sum + user.totalUsage, 
+                {users.reduce((sum, user) => sum + user.totalUsage, 0)}
+              </div>
+              <div className="text-gray-400">Total Tool Uses</div>
+            </div>
+            <div className="bg-gray-800/50 rounded-xl p-4">
+              <div className="text-2xl font-bold text-purple-400">
+                {Math.round(users.reduce((sum, user) => sum + user.activeDays, 0) / users.length) || 0}
+              </div>
+              <div className="text-gray-400">Avg Active Days</div>
+            </div>
+            <div className="bg-gray-800/50 rounded-xl p-4">
+              <div className="text-2xl font-bold text-yellow-400">
+                {users.filter(u => u.badges && u.badges.length >= 3).length}
+              </div>
+              <div className="text-gray-400">Power Users</div>
+            </div>
+          </div>
+
+          {/* Users Grid */}
+          {loading ? (
+            <div className="flex justify-center items-center h-96">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-2xl font-bold mb-2">No Users Found</h3>
+              <p className="text-gray-400">
+                {searchTerm ? `No users match "${searchTerm}"` : 'No users available'}
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredUsers.map((user) => (
+                  <UserCard key={user.userId} user={user} />
+                ))}
+              </div>
+              
+              {/* Pagination Info */}
+              <div className="mt-8 text-center text-gray-400">
+                Showing {filteredUsers.length} of {users.length} users
+                {searchTerm && ` matching "${searchTerm}"`}
+              </div>
+            </>
+          )}
+        </main>
+
+        <Footer />
+      </div>
+    </>
+  );
+}
