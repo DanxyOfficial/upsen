@@ -19,7 +19,6 @@ export default function Home() {
 
   useEffect(() => {
     fetchData();
-    // Refresh setiap 30 detik untuk data real-time
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -31,27 +30,23 @@ export default function Home() {
         fetch('/api/leaderboard'),
         fetch('/api/user/stats')
       ]);
-      
+
       if (leaderboardRes.status === 'fulfilled') {
         const leaderboardData = await leaderboardRes.value.json();
         if (leaderboardData.success) {
           setLeaderboard(leaderboardData.data || []);
         }
       }
-      
+
       if (statsRes.status === 'fulfilled') {
         const statsData = await statsRes.value.json();
         if (statsData.success) {
           setStats(statsData);
         }
       }
-      
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (err) {
       setError('Failed to load data. Using demo data.');
-      
-      // Fallback data
-      const fallbackLeaderboard = [
+      setLeaderboard([
         {
           userId: 'admin',
           joinDate: new Date().toISOString(),
@@ -82,9 +77,7 @@ export default function Home() {
           rank: 3,
           score: 800
         }
-      ];
-      setLeaderboard(fallbackLeaderboard);
-      
+      ]);
     } finally {
       setLoading(false);
     }
@@ -93,179 +86,118 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Upsen Tools - User Activity Dashboard</title>
-        <meta name="description" content="Real-time tracking and leaderboard for Upsen Termux Tools users" />
+        <title>Upsen Tools — User Dashboard</title>
+        <meta name="description" content="Professional real-time dashboard for Upsen Termux Tools" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
+      <div className="min-h-screen bg-[#0b0f14] text-slate-100">
         <Header />
-        
+
         {error && (
-          <div className="bg-yellow-900/30 border border-yellow-700/50 text-yellow-400 px-4 py-3 rounded-lg mx-4 mt-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <span>{error} API sedang offline, menampilkan data contoh.</span>
+          <div className="max-w-6xl mx-auto mt-6 px-4">
+            <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-yellow-300 text-sm">
+              {error} API offline, menampilkan data contoh.
             </div>
           </div>
         )}
-        
-        <main className="container mx-auto px-4 py-8">
-          {/* Hero Section */}
-          <section className="mb-12 text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
-              Upsen Tools Dashboard
+
+        <main className="max-w-7xl mx-auto px-4 py-12">
+          {/* HERO */}
+          <section className="text-center max-w-4xl mx-auto mb-20">
+            <span className="inline-block mb-4 px-4 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-sm">
+              Real-time Monitoring System
+            </span>
+
+            <h1 className="text-5xl md:text-6xl font-semibold tracking-tight mb-6">
+              Upsen Tools
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+                User Activity Dashboard
+              </span>
             </h1>
-            <p className="text-xl text-gray-300 mb-8">
-              Real-time tracking of Termux tools users • Global leaderboard • Achievement system
+
+            <p className="text-lg text-slate-400">
+              Live analytics, leaderboard global, dan sistem badge
+              untuk ekosistem tools berbasis Termux.
             </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-cyan-500/20">
-                <h3 className="text-2xl font-bold text-cyan-400">{stats.totalUsers || 5}</h3>
-                <p className="text-gray-400">Total Users</p>
-              </div>
-              <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-blue-500/20">
-                <h3 className="text-2xl font-bold text-blue-400">{stats.activeToday || 5}</h3>
-                <p className="text-gray-400">Active Today</p>
-              </div>
-              <div className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-purple-500/20">
-                <h3 className="text-2xl font-bold text-purple-400">{stats.totalUsage || 2450}</h3>
-                <p className="text-gray-400">Total Usage</p>
-              </div>
-            </div>
           </section>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Leaderboard */}
-            <div className="lg:col-span-2">
-              <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl border border-gray-700 p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-500">
-                    🏆 Global Leaderboard
-                  </h2>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-sm text-gray-400">Live Updates</span>
-                  </div>
-                </div>
-                
-                {loading ? (
-                  <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
-                  </div>
-                ) : (
-                  <Leaderboard data={leaderboard.slice(0, 10)} />
-                )}
-                
-                <div className="mt-6 text-center">
-                  <a 
-                    href="/leaderboard" 
-                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 rounded-lg font-semibold transition-all transform hover:scale-105"
-                  >
-                    View Full Leaderboard
-                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </a>
-                </div>
+          {/* STATS */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+            {[
+              { label: 'Total Users', value: stats.totalUsers },
+              { label: 'Active Today', value: stats.activeToday },
+              { label: 'Total Usage', value: stats.totalUsage }
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 backdrop-blur-xl"
+              >
+                <p className="text-sm text-slate-400 mb-2">{item.label}</p>
+                <p className="text-3xl font-semibold">{item.value}</p>
               </div>
+            ))}
+          </section>
+
+          {/* MAIN GRID */}
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* LEADERBOARD */}
+            <div className="lg:col-span-2 rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold">🏆 Global Leaderboard</h2>
+                <span className="flex items-center gap-2 text-sm text-slate-400">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  Live
+                </span>
+              </div>
+
+              {loading ? (
+                <div className="h-64 flex flex-col items-center justify-center gap-4">
+                  <div className="w-10 h-10 rounded-full border-2 border-cyan-500/30 border-t-cyan-500 animate-spin" />
+                  <p className="text-sm text-slate-400">Syncing data…</p>
+                </div>
+              ) : (
+                <Leaderboard data={leaderboard.slice(0, 10)} />
+              )}
             </div>
 
-            {/* Badge System & Stats */}
+            {/* SIDE */}
             <div className="space-y-8">
               <BadgeSystem />
-              
-              <div className="bg-gray-900/80 backdrop-blur-lg rounded-2xl border border-gray-700 p-6">
-                <h3 className="text-2xl font-bold mb-4 text-yellow-400">📊 Quick Stats</h3>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">Leaderboard Reset</p>
-                    <p className="text-lg font-semibold">Every 30 days</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Next Reset</p>
-                    <p className="text-lg font-semibold">In {stats.daysUntilReset || 30} days</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">API Status</p>
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
-                      <p className="text-green-400 font-semibold">Operational</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* API Test Button */}
-                <div className="mt-6 pt-6 border-t border-gray-700">
-                  <a 
-                    href="/api/user/login?userId=test_user" 
-                    target="_blank"
-                    className="block text-center px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg transition-all"
-                  >
-                    Test API Endpoint
-                  </a>
-                  <p className="text-xs text-gray-400 mt-2 text-center">
-                    Click to test API response
+
+              <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6">
+                <h3 className="text-xl font-semibold mb-4">📊 System Info</h3>
+
+                <div className="space-y-3 text-sm text-slate-400">
+                  <p>Leaderboard reset setiap 30 hari</p>
+                  <p>Reset berikutnya: <span className="text-white">{stats.daysUntilReset} hari</span></p>
+                  <p className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    API Operational
                   </p>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Recent Users */}
-          <section className="mt-12">
-            <h2 className="text-3xl font-bold mb-6 text-center">👥 Recent Active Users</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {leaderboard.slice(0, 8).map((user, index) => (
-                <UserCard key={user.userId || index} user={user} index={index} />
-              ))}
+                <a
+                  href="/api/user/login?userId=test_user"
+                  target="_blank"
+                  className="mt-6 block text-center rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 py-2 font-medium hover:opacity-90 transition"
+                >
+                  Test API Endpoint
+                </a>
+              </div>
             </div>
           </section>
-          
-          {/* API Documentation */}
-          <section className="mt-16 bg-gray-900/50 rounded-2xl p-8 border border-cyan-500/20">
-            <h2 className="text-3xl font-bold mb-6 text-center text-cyan-400">🔧 API Integration Guide</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-xl font-bold mb-4">For Termux Tools</h3>
-                <div className="bg-black/50 rounded-lg p-4 overflow-x-auto">
-                  <code className="text-sm text-green-400">
-                    curl -X POST "https://upsen-liart.vercel.app/api/user/login" \<br/>
-                    &nbsp;&nbsp;-H "Content-Type: application/json" \<br/>
-                    &nbsp;&nbsp;-d '{"{ \"userId\": \"$(whoami)\" }"}'
-                  </code>
-                </div>
-                <p className="text-gray-400 mt-2 text-sm">
-                  Add this to your Termux tools script to track user activity
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-4">Quick Test</h3>
-                <p className="text-gray-300 mb-4">
-                  Test the API directly from browser:
-                </p>
-                <div className="space-y-2">
-                  <a 
-                    href="/api/user/login?userId=termux_test" 
-                    target="_blank"
-                    className="block px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 rounded-lg text-center"
-                  >
-                    Test with userId: termux_test
-                  </a>
-                  <a 
-                    href="/api/leaderboard" 
-                    target="_blank"
-                    className="block px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg text-center"
-                  >
-                    View Leaderboard API
-                  </a>
-                </div>
-              </div>
+
+          {/* RECENT USERS */}
+          <section className="mt-20">
+            <h2 className="text-2xl font-semibold text-center mb-8">
+              👥 Recent Active Users
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {leaderboard.slice(0, 8).map((user, i) => (
+                <UserCard key={user.userId || i} user={user} index={i} />
+              ))}
             </div>
           </section>
         </main>
