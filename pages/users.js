@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import UserCard from '../components/UserCard';
-import { Users, Search, Filter, Calendar } from 'lucide-react';
+import { Users, Search, Filter } from 'lucide-react';
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -11,8 +11,10 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('rank');
+  const [localUser, setLocalUser] = useState(null);
 
   useEffect(() => {
+    fetchWhoami();
     fetchUsers();
   }, []);
 
@@ -20,89 +22,88 @@ export default function UsersPage() {
     filterAndSortUsers();
   }, [users, searchTerm, sortBy]);
 
+  const fetchWhoami = async () => {
+    try {
+      const res = await fetch('/api/whoami');
+      const data = await res.json();
+      if (data.success) {
+        setLocalUser(data.user);
+      }
+    } catch {
+      setLocalUser(null);
+    }
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/leaderboard?limit=200');
       const data = await res.json();
-      
+
       if (data.success) {
-        setUsers(data.data || []);
-        setFilteredUsers(data.data || []);
+        setUsers(mergeLocalUser(data.data || []));
       } else {
-        // Fallback data
-        const fallbackData = getFallbackData();
-        setUsers(fallbackData);
-        setFilteredUsers(fallbackData);
+        setUsers(mergeLocalUser(getFallbackData()));
       }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      // Fallback data
-      const fallbackData = getFallbackData();
-      setUsers(fallbackData);
-      setFilteredUsers(fallbackData);
+    } catch {
+      setUsers(mergeLocalUser(getFallbackData()));
     } finally {
       setLoading(false);
     }
   };
 
-  const getFallbackData = () => {
+  const mergeLocalUser = (list) => {
+    if (!localUser) return list;
+
+    const exists = list.some(u => u.userId === localUser);
+    if (exists) return list;
+
     return [
       {
-        userId: 'admin',
+        userId: localUser,
         joinDate: new Date().toISOString(),
-        totalUsage: 1000,
-        activeDays: 30,
+        totalUsage: 0,
+        activeDays: 1,
         lastActive: new Date().toISOString(),
-        badges: ['champion', 'power_user', 'top_10'],
-        rank: 1,
-        score: 1500
+        badges: ['local_user'],
+        rank: list.length + 1,
+        score: 0
       },
-      {
-        userId: 'user123',
-        joinDate: new Date(Date.now() - 86400000 * 7).toISOString(),
-        totalUsage: 500,
-        activeDays: 20,
-        lastActive: new Date().toISOString(),
-        badges: ['heavy_user', 'weekly_hero'],
-        rank: 2,
-        score: 1200
-      },
-      {
-        userId: 'termux_user',
-        joinDate: new Date(Date.now() - 86400000 * 3).toISOString(),
-        totalUsage: 100,
-        activeDays: 3,
-        lastActive: new Date().toISOString(),
-        badges: ['newbie'],
-        rank: 3,
-        score: 800
-      }
+      ...list
     ];
   };
+
+  const getFallbackData = () => [
+    {
+      userId: 'admin',
+      joinDate: new Date().toISOString(),
+      totalUsage: 1000,
+      activeDays: 30,
+      lastActive: new Date().toISOString(),
+      badges: ['champion', 'power_user'],
+      rank: 1,
+      score: 1500
+    }
+  ];
 
   const filterAndSortUsers = () => {
     let result = [...users];
 
-    // Filter by search term
     if (searchTerm) {
-      result = result.filter(user =>
-        user.userId && user.userId.toLowerCase().includes(searchTerm.toLowerCase())
+      result = result.filter(u =>
+        u.userId?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Sort users
     result.sort((a, b) => {
       switch (sortBy) {
         case 'usage':
           return (b.totalUsage || 0) - (a.totalUsage || 0);
         case 'days':
           return (b.activeDays || 0) - (a.activeDays || 0);
-        case 'recent':
-          return new Date(b.lastActive || 0) - new Date(a.lastActive || 0);
         case 'score':
           return (b.score || 0) - (a.score || 0);
-        default: // 'rank'
+        default:
           return (a.rank || 999) - (b.rank || 999);
       }
     });
@@ -113,133 +114,76 @@ export default function UsersPage() {
   return (
     <>
       <Head>
-        <title>All Users - Upsen Tools</title>
-        <meta name="description" content="Browse all users of Upsen Termux Tools" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>Users — Upsen Tools</title>
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
+      <div className="min-h-screen bg-[#0b0f14] text-slate-100">
         <Header />
-        
-        <main className="container mx-auto px-4 py-8">
-          {/* Page Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl">
-                  <Users className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold">All Users</h1>
-                  <p className="text-gray-400">Browse all Upsen Tools users</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-cyan-400">{users.length}</div>
-                <div className="text-gray-400">Total Users</div>
-              </div>
-            </div>
 
-            {/* Controls */}
-            <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 mb-6">
-              <div className="relative w-full md:w-96">
-                <Search className="absolute left-3 top-3 w-5 h-5 text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="Search users by ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Filter className="w-5 h-5 text-gray-500" />
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                  >
-                    <option value="rank">Sort by Rank</option>
-                    <option value="usage">Sort by Usage</option>
-                    <option value="days">Sort by Active Days</option>
-                    <option value="score">Sort by Score</option>
-                    <option value="recent">Sort by Recent Activity</option>
-                  </select>
-                </div>
-                <button
-                  onClick={fetchUsers}
-                  className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 rounded-lg transition-all transform hover:scale-105"
-                >
-                  Refresh
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-gray-800/50 rounded-xl p-4">
-              <div className="text-2xl font-bold text-green-400">
-                {users.filter(u => u.lastActive && new Date(u.lastActive).toDateString() === new Date().toDateString()).length}
-              </div>
-              <div className="text-gray-400">Active Today</div>
-            </div>
-            <div className="bg-gray-800/50 rounded-xl p-4">
-              <div className="text-2xl font-bold text-blue-400">
-                {users.reduce((sum, user) => sum + (user.totalUsage || 0), 0)}
-              </div>
-              <div className="text-gray-400">Total Tool Uses</div>
-            </div>
-            <div className="bg-gray-800/50 rounded-xl p-4">
-              <div className="text-2xl font-bold text-purple-400">
-                {users.length > 0 ? Math.round(users.reduce((sum, user) => sum + (user.activeDays || 0), 0) / users.length) : 0}
-              </div>
-              <div className="text-gray-400">Avg Active Days</div>
-            </div>
-            <div className="bg-gray-800/50 rounded-xl p-4">
-              <div className="text-2xl font-bold text-yellow-400">
-                {users.filter(u => u.badges && u.badges.length >= 3).length}
-              </div>
-              <div className="text-gray-400">Power Users</div>
-            </div>
-          </div>
-
-          {/* Users Grid */}
-          {loading ? (
-            <div className="flex justify-center items-center h-96">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold mb-2">No Users Found</h3>
-              <p className="text-gray-400 mb-6">
-                {searchTerm ? `No users match "${searchTerm}"` : 'No users available'}
+        <main className="max-w-7xl mx-auto px-4 py-12">
+          {/* HEADER */}
+          <section className="flex justify-between items-center mb-12">
+            <div>
+              <h1 className="text-4xl font-semibold">All Users</h1>
+              <p className="text-slate-400 mt-2">
+                {localUser
+                  ? `Logged as ${localUser}`
+                  : 'Browsing Upsen Tools users'}
               </p>
-              <button
-                onClick={() => { setSearchTerm(''); fetchUsers(); }}
-                className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 rounded-lg"
+            </div>
+            <div className="p-4 rounded-xl bg-cyan-500/10">
+              <Users className="w-8 h-8 text-cyan-400" />
+            </div>
+          </section>
+
+          {/* CONTROLS */}
+          <section className="flex flex-col md:flex-row gap-4 justify-between mb-10">
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+              <input
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="Search user ID…"
+                className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] focus:ring-2 focus:ring-cyan-500 outline-none"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                className="px-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08]"
               >
-                Reset & Refresh
+                <option value="rank">Rank</option>
+                <option value="usage">Usage</option>
+                <option value="days">Active Days</option>
+                <option value="score">Score</option>
+              </select>
+
+              <button
+                onClick={fetchUsers}
+                className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition"
+              >
+                Refresh
               </button>
             </div>
+          </section>
+
+          {/* GRID */}
+          {loading ? (
+            <div className="h-64 flex justify-center items-center">
+              <div className="w-10 h-10 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
+            </div>
           ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredUsers.map((user, index) => (
-                  <UserCard key={user.userId || index} user={user} index={index} />
-                ))}
-              </div>
-              
-              {/* Pagination Info */}
-              <div className="mt-8 text-center text-gray-400">
-                Showing {filteredUsers.length} of {users.length} users
-                {searchTerm && ` matching "${searchTerm}"`}
-              </div>
-            </>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredUsers.map((user, i) => (
+                <UserCard
+                  key={user.userId || i}
+                  user={user}
+                  highlight={user.userId === localUser}
+                />
+              ))}
+            </div>
           )}
         </main>
 
