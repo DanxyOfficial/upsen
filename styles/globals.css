@@ -1,37 +1,39 @@
-/* IMPORT HARUS PALING ATAS */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* BARU TAILWIND */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* RESET */
+/* FIX YANG TADI SALAH */
 * {
   box-sizing: border-box;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
 html,
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #0b0f14;
+  scroll-behavior: smooth;
+  background: radial-gradient(circle at top, #0f172a, #020617);
   color: #e5e7eb;
+}
+
+body {
   overflow-x: hidden;
 }
 
-/* TEXT */
-p {
-  color: #9ca3af;
-  line-height: 1.6;
+/* BIAR GA TERLIHAT KAYAK HTML 2008 */
+main {
+  min-height: 100vh;
 }
 
 /* GLASS */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.glass-effect {
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
 }
 
