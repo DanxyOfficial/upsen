@@ -1,113 +1,53 @@
+/* IMPORT HARUS PALING ATAS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* BARU TAILWIND */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-/* ================= BASE ================= */
+/* RESET */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html,
 body {
-  padding: 0;
-  margin: 0;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  scroll-behavior: smooth;
-}
-
-body {
-  background: radial-gradient(
-      1200px circle at 10% 10%,
-      rgba(6, 182, 212, 0.08),
-      transparent 40%
-    ),
-    radial-gradient(
-      800px circle at 90% 20%,
-      rgba(139, 92, 246, 0.06),
-      transparent 40%
-    ),
-    #0b0f14;
+  background-color: #0b0f14;
   color: #e5e7eb;
   overflow-x: hidden;
 }
 
-/* ================= TYPOGRAPHY ================= */
-h1, h2, h3, h4 {
-  letter-spacing: -0.02em;
-}
-
+/* TEXT */
 p {
   color: #9ca3af;
   line-height: 1.6;
 }
 
-/* ================= GLASS ================= */
+/* GLASS */
 .glass {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border-radius: 16px;
 }
 
-/* ================= GRADIENT TEXT ================= */
+/* GRADIENT TEXT */
 .gradient-text {
-  background: linear-gradient(
-    90deg,
-    #06b6d4,
-    #3b82f6,
-    #8b5cf6
-  );
+  background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* ================= ANIMATIONS (HALUS) ================= */
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-up {
-  animation: fadeUp 0.6s ease-out forwards;
-}
-
-/* ================= SCROLLBAR ================= */
+/* SCROLLBAR */
 ::-webkit-scrollbar {
   width: 10px;
 }
 
-::-webkit-scrollbar-track {
-  background: #0b0f14;
-}
-
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    to bottom,
-    #06b6d4,
-    #3b82f6
-  );
+  background: linear-gradient(to bottom, #06b6d4, #3b82f6);
   border-radius: 6px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    to bottom,
-    #0891b2,
-    #2563eb
-  );
-}
-
-/* ================= SELECTION ================= */
-::selection {
-  background: rgba(6, 182, 212, 0.35);
-  color: white;
 }
